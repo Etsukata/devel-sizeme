@@ -113,9 +113,15 @@ foreach(['undef', total_size(undef)],
     my $before_length = length $uurk;
     cmp_ok($before_size, '>', $before_length, 'Size before is sane');
     $uurk =~ s/Perl //;
-    is(total_size($uurk), $before_size,
-       "Size doesn't change because OOK is used");
-    cmp_ok(length $uurk, '<', $before_size, 'but string is shorter');
+    if ($] < 5.020) {
+        is(total_size($uurk), $before_size,
+           "Size doesn't change because OOK is used");
+        cmp_ok(length $uurk, '<', $before_size, 'but string is shorter');
+    } else {
+        # COW used by default rather than OOK
+        cmp_ok(total_size($uurk), '<', $before_size,
+           "Smaller because string is shorter");
+    }
 }
 
 sub shared_hash_keys {
